@@ -12,11 +12,11 @@ const chatSchema = new Schema({
         type: String, 
         required: true, 
     },
-    description: { 
-        type: String, 
-        enum: ["user", "ai"],
-        required: true,
-    },
+    // description: { 
+    //     type: String, 
+    //     enum: ["user", "ai"],
+    //     required: true,
+    // },
 }, { timestamps: true });
 
 const chatModel = model("Chat", chatSchema);

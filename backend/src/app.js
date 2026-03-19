@@ -5,6 +5,7 @@ import cors from "cors"
 import morgan from "morgan"
 
 import authRouter from "./routes/auth.routes.js";
+import chatRouter from "./routes/chat.routes.js";
 
 
 // Load environment variables
@@ -13,8 +14,8 @@ dotenv.config();
 const app = express();
 
 //*MIDDLEWARES
-app.use(express.json());
-app.use(express.urlencoded())
+app.use(express.json());  // parses application/json
+app.use(express.urlencoded({ extended: true }))  // parses form data
 app.use(cookieParser())
 app.use(morgan("dev"))
 app.use(cors({
@@ -26,5 +27,6 @@ app.use(cors({
 
 //* ROUTES
 app.use("/api/auth", authRouter);
+app.use("/api/chats", chatRouter)
 
 export default app;
