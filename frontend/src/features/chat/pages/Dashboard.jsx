@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useChat } from '../hooks/useChat'
 import {useSelector} from "react-redux"
 
@@ -11,20 +12,10 @@ const Dashboard = () => {
     const chats = useSelector(state => state.chat.chats)
     const currentChatId = useSelector((state)=> state.chat.currentChatId)
 
-    console.log(chats[currentChatId])
-
     useEffect(() => {
         chat.initializeSocketConnection()
+        chat.handleGetChats()
     }, [])
-
-
-    const conversations = [
-        { id: 1, title: 'Chat title 1' },
-        { id: 2, title: 'Chat title 2' },
-        { id: 3, title: 'Chat title 3' },
-        { id: 4, title: 'Chat title 4' },
-        { id: 5, title: 'Chat title 5' },
-    ]
 
     const handleSubmitMessage =(e)=>{
         e.preventDefault()
@@ -38,6 +29,10 @@ const Dashboard = () => {
         setChatInput("")
     }
 
+    const openChat = async(chatId)=>{
+        await chat.handleOpenChat({chatId})
+    }
+
     return (
         <main className='h-screen w-full flex bg-slate-900 text-slate-100'>
             <aside className='w-80 border-r border-slate-700 bg-slate-950 flex flex-col'>
@@ -45,12 +40,13 @@ const Dashboard = () => {
                     <h1 className='text-2xl font-bold tracking-wider'>Replex</h1>
                 </div>
                 <div className='flex-1 overflow-y-auto p-3 space-y-2'>
-                    {conversations.map(conv => (
+                    {Object.values(chats).map((chat, idx) => (
                         <button
-                            key={conv.id}
-                            className='w-full text-left rounded-lg border border-slate-700 px-2 py-1 transition-colors duration-150 hover:bg-slate-800 hover:border-slate-500'
+                            onClick={() => {openChat(chat.id)}}
+                            key={idx}
+                            className='w-full text-left rounded-lg border border-slate-700 px-2 py-1 transition-colors duration-150 hover:bg-slate-800 hover:border-slate-500 cursor-pointer'
                         >
-                            {conv.title}
+                            {chat.title}
                         </button>
                     ))}
                 </div>
@@ -69,13 +65,18 @@ const Dashboard = () => {
 
                 <div className='flex-1 overflow-y-auto p-4 bg-linear-to-b from-slate-900 to-slate-800'>
                     <div className='max-w-6xl mx-auto space-y-4 flex flex-col'>
-                        {chats[currentChatId]?.message.map((msg, idx) => (
+                        {chats[currentChatId]?.messages.map((msg, idx) => (
                             <article
                                 key={idx}
                                 className={`py-1 px-3 rounded-xl ${msg.role === 'ai' ? 'bg-slate-800 text-slate-100 self-start rounded-tl-xs' : 'bg-sky-700/20 text-sky-100 self-end text-right rounded-br-xs'} max-w-[80%] w-fit`}
                             >
-                                {/* <p className='text-sm font-medium uppercase tracking-wide mb-1 text-slate-300'>{msg.sender === 'ai' ? 'AI message' : 'Your message'}</p> */}
-                                <p className='text-base leading-relaxed'>{msg.content}</p>
+                                {msg.role === 'ai' ? (
+                                    <div className='prose prose-invert text-sm leading-relaxed'>
+                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <p className='text-base leading-relaxed'>{msg.content}</p>
+                                )}
                             </article>
                         ))}
                     </div>
