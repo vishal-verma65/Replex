@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '../hooks/useChat'
 import {useSelector} from "react-redux"
+import { clearChatMessages } from '../chat.slice'
+import { useDispatch } from "react-redux";
 
 const Dashboard = () => {
+    const dispatch = useDispatch()
 
     const [chatInput, setChatInput] = useState("")
     const [userMessage, setUserMessage] = useState("")
@@ -30,7 +33,10 @@ const Dashboard = () => {
     }
 
     const openChat = async(chatId)=>{
-        await chat.handleOpenChat({chatId})
+        if(chatId !== currentChatId){
+            dispatch(clearChatMessages({ chatId: currentChatId }))
+            await chat.handleOpenChat({chatId, chats})
+        }
     }
 
     return (
@@ -68,12 +74,20 @@ const Dashboard = () => {
                         {chats[currentChatId]?.messages.map((msg, idx) => (
                             <article
                                 key={idx}
-                                className={`py-1 px-3 rounded-xl ${msg.role === 'ai' ? 'bg-slate-800 text-slate-100 self-start rounded-tl-xs' : 'bg-sky-700/20 text-sky-100 self-end text-right rounded-br-xs'} max-w-[80%] w-fit`}
+                                className={`py-1 px-3 rounded-xl ${msg.role === 'ai' ? ' text-slate-100 self-start' : 'bg-sky-700/20 text-sky-100 self-end text-right rounded-br-xs'} max-w-[80%] w-fit`}
                             >
                                 {msg.role === 'ai' ? (
-                                    <div className='prose prose-invert text-sm leading-relaxed'>
-                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                    </div>
+                                        <ReactMarkdown
+                                            components={{
+                                                p: ({children})=> <p className='mb2 mt-3 last:mb-0'>{children}</p>,
+                                                ul: ({children})=> <p className='mb2 list-disc pl-5'>{children}</p>,
+                                                ol: ({children})=> <p className='mb2 list-decimal pl-5'>{children}</p>,
+                                                code: ({children})=> <p className='rounded bg-white/10 px-1 py-0.5'>{children}</p>,
+                                                pre: ({children})=> <p className='mb2 overflow-x-auto rounded-xl bg-black/10'>{children}</p>,
+                                           } }
+                                        >
+                                            {msg.content}
+                                        </ReactMarkdown>
                                 ) : (
                                     <p className='text-base leading-relaxed'>{msg.content}</p>
                                 )}

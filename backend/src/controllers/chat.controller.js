@@ -13,6 +13,7 @@ export const sendMessage = async(req, res)=>{
             title,    
         })
     }
+    console.log("chat :", chat)
 
     const userMessage = await messageModel.create({
         chat: chatId || chat._id,

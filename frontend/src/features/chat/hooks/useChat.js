@@ -13,21 +13,25 @@ export const useChat =()=>{
         try{
             const data = await sendMessage({message, chatId})
             const {chat, aiMessage} = data
-            dispatch(createNewChat({
-                chatId: chat._id,
-                title: chat.title,
-            }))
+
+            if(!chatId){
+                    dispatch(createNewChat({
+                    chatId: chat._id,
+                    title: chat.title,
+                }))
+            }
+            
             dispatch(addNewMessage({
-                chatId: chat._id,
+                chatId: chatId || chat._id,
                 content: message,
                 role: "user",
             }))
             dispatch(addNewMessage({
-                chatId: chat._id,
+                chatId: chatId || chat._id,
                 content: aiMessage.content,
                 role: aiMessage.role,
             }))
-            dispatch(setCurrentChatId(chat._id))
+            dispatch(setCurrentChatId(chatId || chat._id))
         }
         catch(error){
             dispatch(setError(error.response?.data?.message || "Send chat failed"))
@@ -42,6 +46,7 @@ export const useChat =()=>{
 
         try{
             const data = await getChats()
+
             const {chats} = data
             dispatch(setChats(chats.reduce((acc, chat)=>{
                 acc[chat._id]= {
@@ -62,22 +67,25 @@ export const useChat =()=>{
         }
     }
 
-    const handleOpenChat = async({chatId})=>{
+    const handleOpenChat = async({chatId, chats})=>{
         dispatch(setLoading(true))
         try{
-            const data = await getMessages({chatId})
-            const {messages } =data
+            
+            if(chats[chatId]?.messages.length === 0){
+                const data = await getMessages({chatId})
+                const {messages } =data
 
-            const formattedMessages = messages.map(msg=>({
-                content: msg.content,
-                role: msg.role,
-            }))
+                const formattedMessages = messages.map(msg=>({
+                    content: msg.content,
+                    role: msg.role,
+                }))
 
-            dispatch(setCurrentChatId(chatId))
-            dispatch(addMessages({
-                chatId,
-                messages: formattedMessages
-            }))
+                dispatch(setCurrentChatId(chatId))
+                dispatch(addMessages({
+                    chatId,
+                    messages: formattedMessages
+                }))
+            }
         }
         catch(error){
             dispatch(setError(error.response?.data?.message || "Open chat failed"))
