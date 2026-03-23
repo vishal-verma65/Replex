@@ -4,6 +4,7 @@ import { useChat } from '../hooks/useChat'
 import {useSelector} from "react-redux"
 import { clearChatMessages } from '../chat.slice'
 import { useDispatch } from "react-redux";
+import remarkGfm from 'remark-gfm'
 
 const Dashboard = () => {
     const dispatch = useDispatch()
@@ -85,6 +86,7 @@ const Dashboard = () => {
                                                 code: ({children})=> <p className='rounded bg-white/10 px-1 py-0.5'>{children}</p>,
                                                 pre: ({children})=> <p className='mb2 overflow-x-auto rounded-xl bg-black/10'>{children}</p>,
                                            } }
+                                        //    remarkPlugins={{remarkGfm}}
                                         >
                                             {msg.content}
                                         </ReactMarkdown>
